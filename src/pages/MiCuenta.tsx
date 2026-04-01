@@ -30,11 +30,17 @@ const MiCuenta = () => {
   const [contactFields, setContactFields] = useState<ContactField[]>(initialContactFields);
   const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [otpSessions, setOtpSessions] = useState<Record<string, OtpSession>>({});
   const [otpModal, setOtpModal] = useState<{
     open: boolean;
     field: ContactField | null;
     pendingValue: string | null;
   }>({ open: false, field: null, pendingValue: null });
+
+  const handleSessionUpdate = useCallback((session: OtpSession | null) => {
+    if (!session) return;
+    setOtpSessions((prev) => ({ ...prev, [session.fieldId]: session }));
+  }, []);
 
   const allVerified = useMemo(
     () => contactFields.every((f) => f.status === "verified"),
