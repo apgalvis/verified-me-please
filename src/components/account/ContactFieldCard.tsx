@@ -58,7 +58,7 @@ const ContactFieldCard = ({
 
   if (isEditing) {
     return (
-      <div className="px-5 py-4">
+      <div className="px-4 py-3 sm:px-5 sm:py-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
             <div className="relative">
