@@ -5,47 +5,63 @@ import UserAvatar from "@/components/account/UserAvatar";
 import ContactFieldCard from "@/components/account/ContactFieldCard";
 import OtpVerificationModal from "@/components/account/OtpVerificationModal";
 import { ContactField, UserProfile } from "@/types/account";
-import { User, Phone } from "lucide-react";
 
 const initialProfile: UserProfile = {
-  firstName: "Carlos",
-  lastName: "Mendoza",
+  firstName: "Aldo mod",
+  lastName: "Nolla",
   memberSince: "Enero 2024",
 };
 
-const initialFields: ContactField[] = [
+const userInfoFields: ContactField[] = [
   {
-    id: "email-personal",
-    label: "Email personal",
-    value: "carlos.mendoza@gmail.com",
+    id: "nombre",
+    label: "Nombre completo",
+    value: "Aldo mod Nolla",
     type: "email",
     status: "verified",
   },
   {
+    id: "email-personal",
+    label: "Email personal",
+    value: "aldo.nolla@propiedades.com",
+    type: "email",
+    status: "verified",
+  },
+  {
+    id: "password",
+    label: "Contraseña",
+    value: "************",
+    type: "email",
+    status: "verified",
+  },
+];
+
+const initialContactFields: ContactField[] = [
+  {
     id: "email-contacto",
     label: "Email de contacto",
-    value: "cmendoza@propiedades.com",
+    value: "danielnn83@yahoo.com.mx",
     type: "email",
-    status: "not_verified",
+    status: "verified",
   },
   {
     id: "phone-personal",
     label: "Número personal",
-    value: "+52 55 1234 5678",
+    value: "5579898039",
     type: "phone",
-    status: "pending",
+    status: "verified",
   },
   {
     id: "whatsapp",
-    label: "WhatsApp",
-    value: "+52 55 8765 4321",
+    label: "Número de WhatsApp",
+    value: "5579898039",
     type: "whatsapp",
     status: "not_verified",
   },
 ];
 
 const MiCuenta = () => {
-  const [fields, setFields] = useState<ContactField[]>(initialFields);
+  const [contactFields, setContactFields] = useState<ContactField[]>(initialContactFields);
   const [otpModal, setOtpModal] = useState<{
     open: boolean;
     field: ContactField | null;
@@ -61,7 +77,7 @@ const MiCuenta = () => {
 
   const handleVerified = useCallback(() => {
     if (!otpModal.field) return;
-    setFields((prev) =>
+    setContactFields((prev) =>
       prev.map((f) =>
         f.id === otpModal.field!.id ? { ...f, status: "verified" as const } : f
       )
@@ -75,44 +91,46 @@ const MiCuenta = () => {
     <div className="min-h-screen bg-background">
       <AccountHeader />
 
-      <div className="mx-auto max-w-lg px-4">
-        <UserAvatar profile={initialProfile} />
+      <div className="mx-auto max-w-4xl px-4 py-8">
+        <div className="flex flex-col md:flex-row gap-8">
+          {/* Left column — Avatar */}
+          <div className="shrink-0">
+            <UserAvatar profile={initialProfile} />
+          </div>
 
-        {/* User Info Section */}
-        <div className="mt-8">
-          <div className="mb-3 flex items-center gap-2">
-            <User className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-semibold text-foreground">
+          {/* Right column — Info sections */}
+          <div className="flex-1 min-w-0">
+            {/* Información de usuario */}
+            <h3 className="text-base font-bold text-foreground mb-3">
               Información de usuario
             </h3>
-          </div>
-          <div className="space-y-2">
-            <div className="rounded-xl border border-border bg-card p-4">
-              <p className="text-xs text-muted-foreground">Nombre completo</p>
-              <p className="text-sm font-medium text-foreground">
-                {initialProfile.firstName} {initialProfile.lastName}
-              </p>
+            <div className="rounded-lg border border-border bg-card divide-y divide-border">
+              {userInfoFields.map((field) => (
+                <ContactFieldCard
+                  key={field.id}
+                  field={field}
+                  onConfirm={openOtp}
+                  onModify={() => {}}
+                  showConfirm={false}
+                />
+              ))}
             </div>
-          </div>
-        </div>
 
-        {/* Contact Info Section */}
-        <div className="mt-8 pb-12">
-          <div className="mb-3 flex items-center gap-2">
-            <Phone className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-semibold text-foreground">
+            {/* Información de contacto */}
+            <h3 className="text-base font-bold text-foreground mb-3 mt-10">
               Información de contacto
             </h3>
-          </div>
-          <div className="space-y-3">
-            {fields.map((field) => (
-              <ContactFieldCard
-                key={field.id}
-                field={field}
-                onConfirm={openOtp}
-                onModify={openOtp}
-              />
-            ))}
+            <div className="rounded-lg border border-border bg-card divide-y divide-border">
+              {contactFields.map((field) => (
+                <ContactFieldCard
+                  key={field.id}
+                  field={field}
+                  onConfirm={openOtp}
+                  onModify={openOtp}
+                  showConfirm={field.status === "not_verified"}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
