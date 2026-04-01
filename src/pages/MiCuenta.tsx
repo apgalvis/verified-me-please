@@ -1,9 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import AccountHeader from "@/components/account/AccountHeader";
 import UserAvatar from "@/components/account/UserAvatar";
 import ContactFieldCard from "@/components/account/ContactFieldCard";
 import OtpVerificationModal from "@/components/account/OtpVerificationModal";
+import VerificationProgress from "@/components/account/VerificationProgress";
+import FullVerificationCelebration from "@/components/account/FullVerificationCelebration";
 import { ContactField, UserProfile } from "@/types/account";
 
 const initialProfile: UserProfile = {
@@ -27,11 +29,17 @@ const initialContactFields: ContactField[] = [
 const MiCuenta = () => {
   const [contactFields, setContactFields] = useState<ContactField[]>(initialContactFields);
   const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
+  const [showCelebration, setShowCelebration] = useState(false);
   const [otpModal, setOtpModal] = useState<{
     open: boolean;
     field: ContactField | null;
     pendingValue: string | null;
   }>({ open: false, field: null, pendingValue: null });
+
+  const allVerified = useMemo(
+    () => contactFields.every((f) => f.status === "verified"),
+    [contactFields]
+  );
 
   const handleStartEdit = useCallback((fieldId: string) => {
     setEditingFieldId(fieldId);
@@ -41,23 +49,19 @@ const MiCuenta = () => {
     setEditingFieldId(null);
   }, []);
 
-  // "Confirmar" — campo no verificado, sin editar, envía OTP al valor actual
   const handleConfirm = useCallback((field: ContactField) => {
     setOtpModal({ open: true, field, pendingValue: null });
   }, []);
 
-  // "Guardar" — lógica: salta OTP solo si ya verificado Y no cambió valor
   const handleSave = useCallback((field: ContactField, newValue: string, valueChanged: boolean) => {
     const needsOtp = field.status !== "verified" || valueChanged;
 
     if (!needsOtp) {
-      // Ya verificado y sin cambios → volver a solo lectura
       setEditingFieldId(null);
       toast.info("No se realizaron cambios");
       return;
     }
 
-    // Abrir OTP. Si cambió el valor, guardamos el pendiente
     setOtpModal({
       open: true,
       field,
@@ -73,24 +77,33 @@ const MiCuenta = () => {
   const handleVerified = useCallback(() => {
     if (!otpModal.field) return;
 
-    setContactFields((prev) =>
-      prev.map((f) => {
+    let newFields: ContactField[] = [];
+    setContactFields((prev) => {
+      newFields = prev.map((f) => {
         if (f.id !== otpModal.field!.id) return f;
         return {
           ...f,
           value: otpModal.pendingValue ?? f.value,
           status: "verified" as const,
         };
-      })
-    );
+      });
+      return newFields;
+    });
 
     const action = otpModal.pendingValue ? "actualizado y verificado" : "verificado";
-    toast.success(`Dato ${action} correctamente`, {
+    toast.success(`¡Listo! Tu dato fue ${action} correctamente.`, {
       description: `${otpModal.field.label} ha sido confirmado.`,
     });
+
+    // Check if all verified after this update
+    setTimeout(() => {
+      const allNowVerified = newFields.every((f) => f.status === "verified");
+      if (allNowVerified) {
+        setShowCelebration(true);
+      }
+    }, 200);
   }, [otpModal.field, otpModal.pendingValue]);
 
-  // El destino del OTP: si hay valor pendiente (nuevo), se envía ahí; si no, al actual
   const otpDestination = otpModal.pendingValue ?? otpModal.field?.value ?? "";
 
   return (
@@ -100,7 +113,7 @@ const MiCuenta = () => {
       <div className="mx-auto max-w-4xl px-4 py-8">
         <div className="flex flex-col md:flex-row gap-8">
           <div className="shrink-0">
-            <UserAvatar profile={initialProfile} />
+            <UserAvatar profile={initialProfile} allVerified={allVerified} />
           </div>
 
           <div className="flex-1 min-w-0">
@@ -123,8 +136,13 @@ const MiCuenta = () => {
               ))}
             </div>
 
+            {/* Progress section */}
+            <div className="mt-10">
+              <VerificationProgress fields={contactFields} />
+            </div>
+
             {/* Información de contacto */}
-            <h3 className="text-base font-bold text-foreground mb-3 mt-10">
+            <h3 className="text-base font-bold text-foreground mb-3">
               Información de contacto
             </h3>
             <div className="rounded-lg border border-border bg-card divide-y divide-border">
@@ -154,6 +172,11 @@ const MiCuenta = () => {
           onVerified={handleVerified}
         />
       )}
+
+      <FullVerificationCelebration
+        open={showCelebration}
+        onClose={() => setShowCelebration(false)}
+      />
     </div>
   );
 };
