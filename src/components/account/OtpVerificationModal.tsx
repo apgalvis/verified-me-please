@@ -37,6 +37,15 @@ const channelIcon: Record<ContactFieldType, React.ReactNode> = {
   whatsapp: <MessageCircle className="h-6 w-6" />,
 };
 
+const channelMarketingDesc: Record<ContactFieldType, string> = {
+  email:
+    "Te enviamos un código para confirmar tu correo y asegurar la recepción de notificaciones importantes.",
+  phone:
+    "Confirma tu número para recibir contactos de clientes sin interrupciones.",
+  whatsapp:
+    "Verifica tu WhatsApp y responde leads de forma más rápida y directa.",
+};
+
 type ModalState = "input" | "loading" | "success" | "error" | "expired";
 
 const MOCK_VALID_CODE = "123456";
@@ -71,8 +80,6 @@ const OtpVerificationModal = ({
     if (code.length !== 6) return;
 
     setState("loading");
-
-    // Simulate API call
     await new Promise((r) => setTimeout(r, 1500));
 
     if (code === MOCK_VALID_CODE) {
@@ -129,11 +136,10 @@ const OtpVerificationModal = ({
             <div>
               <DialogHeader className="p-0 space-y-0.5 text-left">
                 <DialogTitle className="text-lg font-bold text-white">
-                  Verificación de código
+                  Verifica tu información
                 </DialogTitle>
                 <DialogDescription className="text-xs text-white/70">
-                  Ingresa el código de 6 dígitos que enviamos por{" "}
-                  {channelLabel[type]}
+                  {channelMarketingDesc[type]}
                 </DialogDescription>
               </DialogHeader>
             </div>
@@ -148,16 +154,16 @@ const OtpVerificationModal = ({
                 <ShieldCheck className="h-8 w-8 text-[hsl(var(--verified))]" />
               </div>
               <p className="text-base font-semibold text-foreground">
-                ¡Verificado correctamente!
+                ¡Listo! Tu dato fue verificado correctamente.
               </p>
               <p className="text-sm text-muted-foreground">
-                Tu dato ha sido confirmado
+                Tu información ha sido confirmada
               </p>
             </div>
           ) : (
             <>
               <p className="text-center text-sm text-muted-foreground">
-                Enviamos un código a{" "}
+                Enviamos un código de 6 dígitos a{" "}
                 <span className="font-medium text-foreground">
                   {maskedDestination}
                 </span>

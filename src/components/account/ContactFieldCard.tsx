@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ContactField } from "@/types/account";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import StatusBadge from "./StatusBadge";
 
 interface ContactFieldCardProps {
   field: ContactField;
@@ -13,6 +14,21 @@ interface ContactFieldCardProps {
   onCancelEdit: () => void;
 }
 
+const statusMicrocopy: Record<string, { message: string; cta: string }> = {
+  verified: {
+    message: "Este dato está validado y activo para recibir contactos.",
+    cta: "Modificar",
+  },
+  pending: {
+    message: "Confirma este dato para asegurar la recepción de tus leads.",
+    cta: "Confirmar",
+  },
+  not_verified: {
+    message: "Verifica este dato para no perder oportunidades de contacto.",
+    cta: "Verificar ahora",
+  },
+};
+
 const ContactFieldCard = ({
   field,
   onConfirm,
@@ -23,6 +39,7 @@ const ContactFieldCard = ({
   onCancelEdit,
 }: ContactFieldCardProps) => {
   const [editValue, setEditValue] = useState(field.value);
+  const copy = statusMicrocopy[field.status] || statusMicrocopy.not_verified;
 
   const handleStartEdit = () => {
     setEditValue(field.value);
@@ -58,7 +75,7 @@ const ContactFieldCard = ({
           </div>
           <button
             onClick={handleCancel}
-            className="mt-2 text-sm font-medium text-[hsl(var(--primary))] hover:underline shrink-0"
+            className="mt-2 text-sm font-medium text-primary hover:underline shrink-0"
           >
             Cancelar
           </button>
@@ -76,28 +93,32 @@ const ContactFieldCard = ({
   }
 
   return (
-    <div className="flex items-center justify-between gap-4 px-5 py-4">
-      <div className="min-w-0">
-        <p className="text-xs font-medium text-muted-foreground">{field.label}</p>
-        <p className="text-sm text-foreground mt-0.5">{field.value}</p>
-      </div>
+    <div className="px-5 py-4">
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-xs font-medium text-muted-foreground">{field.label}</p>
+          <p className="text-sm text-foreground mt-0.5">{field.value}</p>
+        </div>
 
-      <div className="flex items-center gap-4 shrink-0">
-        {showConfirm && (
+        <div className="flex items-center gap-3 shrink-0">
+          <StatusBadge status={field.status} />
+          {showConfirm && (
+            <button
+              onClick={() => onConfirm(field)}
+              className="text-sm font-semibold text-primary hover:underline"
+            >
+              {copy.cta}
+            </button>
+          )}
           <button
-            onClick={() => onConfirm(field)}
-            className="text-sm font-medium text-[hsl(var(--primary))] hover:underline"
+            onClick={handleStartEdit}
+            className="text-sm font-medium text-muted-foreground hover:text-foreground hover:underline"
           >
-            Confirmar
+            Modificar
           </button>
-        )}
-        <button
-          onClick={handleStartEdit}
-          className="text-sm font-medium text-[hsl(var(--primary))] hover:underline"
-        >
-          Modificar
-        </button>
+        </div>
       </div>
+      <p className="text-xs text-muted-foreground mt-1">{copy.message}</p>
     </div>
   );
 };

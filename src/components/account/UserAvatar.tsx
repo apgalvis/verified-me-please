@@ -1,11 +1,18 @@
-import { Camera } from "lucide-react";
+import { Camera, ShieldCheck } from "lucide-react";
 import { UserProfile } from "@/types/account";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface UserAvatarProps {
   profile: UserProfile;
+  allVerified?: boolean;
 }
 
-const UserAvatar = ({ profile }: UserAvatarProps) => {
+const UserAvatar = ({ profile, allVerified = false }: UserAvatarProps) => {
   const initials = `${profile.firstName[0]}${profile.lastName[0]}`.toUpperCase();
 
   return (
@@ -24,6 +31,27 @@ const UserAvatar = ({ profile }: UserAvatarProps) => {
       <p className="text-xs text-muted-foreground">
         Miembro desde {profile.memberSince}
       </p>
+
+      {allVerified && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="mt-2 flex items-center gap-1.5 rounded-full bg-[hsl(var(--verified))]/10 px-3 py-1 cursor-default">
+                <ShieldCheck className="h-4 w-4 text-[hsl(var(--verified))]" />
+                <span className="text-xs font-bold text-[hsl(var(--verified))]">
+                  Usuario verificado
+                </span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-[220px] text-center">
+              <p className="text-xs">
+                Tu perfil está completamente verificado. Esto aumenta la
+                confianza y mejora tu desempeño en la plataforma.
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
     </div>
   );
 };
