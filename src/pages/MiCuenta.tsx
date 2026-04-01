@@ -174,6 +174,9 @@ const MiCuenta = () => {
           destination={otpDestination}
           onClose={closeOtp}
           onVerified={handleVerified}
+          fieldId={otpModal.field.id}
+          session={otpSessions[otpModal.field.id] ?? null}
+          onSessionUpdate={handleSessionUpdate}
         />
       )}
 
