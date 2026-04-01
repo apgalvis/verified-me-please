@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import AccountHeader from "@/components/account/AccountHeader";
 import UserAvatar from "@/components/account/UserAvatar";
 import ContactFieldCard from "@/components/account/ContactFieldCard";
-import OtpVerificationModal from "@/components/account/OtpVerificationModal";
+import OtpVerificationModal, { OtpSession } from "@/components/account/OtpVerificationModal";
 import VerificationProgress from "@/components/account/VerificationProgress";
 import FullVerificationCelebration from "@/components/account/FullVerificationCelebration";
 import { ContactField, UserProfile } from "@/types/account";
