@@ -116,8 +116,8 @@ const MiCuenta = () => {
     <div className="min-h-screen bg-background">
       <AccountHeader />
 
-      <div className="mx-auto max-w-4xl px-4 py-8">
-        <div className="flex flex-col md:flex-row gap-8">
+       <div className="mx-auto max-w-4xl px-3 py-6 sm:px-4 sm:py-8">
+        <div className="flex flex-col md:flex-row gap-6 sm:gap-8">
           <div className="shrink-0">
             <UserAvatar profile={initialProfile} allVerified={allVerified} />
           </div>
