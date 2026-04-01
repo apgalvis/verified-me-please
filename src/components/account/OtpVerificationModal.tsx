@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,12 +17,23 @@ import { ArrowLeft, Loader2, ShieldCheck, Mail, Phone, MessageCircle } from "luc
 import { ContactFieldType } from "@/types/account";
 import OtpCountdown from "./OtpCountdown";
 
+export interface OtpSession {
+  fieldId: string;
+  sentAt: number;
+  countdownRemaining: number;
+}
+
 interface OtpVerificationModalProps {
   open: boolean;
   type: ContactFieldType;
   destination: string;
   onClose: () => void;
   onVerified: () => void;
+  /** Existing session for this field, if any */
+  session?: OtpSession | null;
+  /** Called to persist session changes */
+  onSessionUpdate?: (session: OtpSession | null) => void;
+  fieldId: string;
 }
 
 const channelLabel: Record<ContactFieldType, string> = {
@@ -46,9 +57,11 @@ const channelMarketingDesc: Record<ContactFieldType, string> = {
     "Verifica tu WhatsApp y responde leads de forma más rápida y directa.",
 };
 
-type ModalState = "input" | "loading" | "success" | "error" | "expired";
-
+const OTP_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
+const COUNTDOWN_SECONDS = 60;
 const MOCK_VALID_CODE = "123456";
+
+type ModalState = "input" | "loading" | "success" | "error" | "expired";
 
 const OtpVerificationModal = ({
   open,
@@ -56,12 +69,29 @@ const OtpVerificationModal = ({
   destination,
   onClose,
   onVerified,
+  session,
+  onSessionUpdate,
+  fieldId,
 }: OtpVerificationModalProps) => {
   const [code, setCode] = useState("");
   const [state, setState] = useState<ModalState>("input");
   const [errorMessage, setErrorMessage] = useState("");
   const [attempts, setAttempts] = useState(0);
   const [shaking, setShaking] = useState(false);
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
+
+  // Determine if there's a valid existing session
+  const hasActiveSession =
+    session &&
+    session.fieldId === fieldId &&
+    Date.now() - session.sentAt < OTP_EXPIRY_MS;
+
+  const resumeCountdown = hasActiveSession
+    ? Math.max(0, session!.countdownRemaining)
+    : undefined;
+
+  const isResuming = hasActiveSession && (resumeCountdown ?? 0) > 0;
 
   const resetState = useCallback(() => {
     setCode("");
@@ -72,6 +102,7 @@ const OtpVerificationModal = ({
   }, []);
 
   const handleClose = useCallback(() => {
+    // Don't clear session on close — persist it
     resetState();
     onClose();
   }, [resetState, onClose]);
@@ -84,6 +115,8 @@ const OtpVerificationModal = ({
 
     if (code === MOCK_VALID_CODE) {
       setState("success");
+      // Clear session on success
+      onSessionUpdate?.(null);
       setTimeout(() => {
         onVerified();
         handleClose();
@@ -95,6 +128,7 @@ const OtpVerificationModal = ({
       if (newAttempts >= 5) {
         setState("expired");
         setErrorMessage("Demasiados intentos. Solicita un nuevo código.");
+        onSessionUpdate?.(null);
       } else {
         setState("error");
         setErrorMessage("Código incorrecto. Inténtalo de nuevo.");
@@ -103,14 +137,45 @@ const OtpVerificationModal = ({
         setCode("");
       }
     }
-  }, [code, attempts, onVerified, handleClose]);
+  }, [code, attempts, onVerified, handleClose, onSessionUpdate]);
 
   const handleResend = useCallback(() => {
     setCode("");
     setState("input");
     setErrorMessage("");
     setAttempts(0);
-  }, []);
+    // Create new session
+    onSessionUpdate?.({
+      fieldId,
+      sentAt: Date.now(),
+      countdownRemaining: COUNTDOWN_SECONDS,
+    });
+  }, [fieldId, onSessionUpdate]);
+
+  const handleCountdownTick = useCallback(
+    (remaining: number) => {
+      onSessionUpdate?.({
+        fieldId,
+        sentAt: sessionRef.current?.sentAt ?? Date.now(),
+        countdownRemaining: remaining,
+      });
+    },
+    [fieldId, onSessionUpdate]
+  );
+
+  // On first open without active session, create one
+  const hasInitialized = useRef(false);
+  if (open && !hasActiveSession && !hasInitialized.current) {
+    hasInitialized.current = true;
+    onSessionUpdate?.({
+      fieldId,
+      sentAt: Date.now(),
+      countdownRemaining: COUNTDOWN_SECONDS,
+    });
+  }
+  if (!open) {
+    hasInitialized.current = false;
+  }
 
   const maskedDestination =
     type === "email"
@@ -162,12 +227,20 @@ const OtpVerificationModal = ({
             </div>
           ) : (
             <>
-              <p className="text-center text-sm text-muted-foreground">
-                Enviamos un código de 6 dígitos a{" "}
-                <span className="font-medium text-foreground">
-                  {maskedDestination}
-                </span>
-              </p>
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">
+                  Enviamos un código de 6 dígitos a{" "}
+                  <span className="font-medium text-foreground">
+                    {maskedDestination}
+                  </span>
+                </p>
+                {isResuming && (
+                  <p className="text-xs text-primary font-medium mt-2">
+                    Ya enviamos un código. Puedes usar el mismo o solicitar uno
+                    nuevo cuando finalice el tiempo.
+                  </p>
+                )}
+              </div>
 
               <div className={shaking ? "animate-shake" : ""}>
                 <InputOTP
@@ -217,7 +290,11 @@ const OtpVerificationModal = ({
                 )}
               </Button>
 
-              <OtpCountdown onResend={handleResend} />
+              <OtpCountdown
+                resumeSeconds={resumeCountdown}
+                onResend={handleResend}
+                onTick={handleCountdownTick}
+              />
 
               <p className="text-center text-xs text-muted-foreground">
                 Esto ayuda a mejorar la seguridad de tu cuenta
