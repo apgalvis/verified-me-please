@@ -116,8 +116,8 @@ const MiCuenta = () => {
     <div className="min-h-screen bg-background">
       <AccountHeader />
 
-      <div className="mx-auto max-w-4xl px-4 py-8">
-        <div className="flex flex-col md:flex-row gap-8">
+       <div className="mx-auto max-w-4xl px-3 py-6 sm:px-4 sm:py-8">
+        <div className="flex flex-col md:flex-row gap-6 sm:gap-8">
           <div className="shrink-0">
             <UserAvatar profile={initialProfile} allVerified={allVerified} />
           </div>
@@ -127,7 +127,7 @@ const MiCuenta = () => {
             <VerificationProgress fields={contactFields} />
 
             {/* Información de la cuenta */}
-            <h3 className="text-base font-bold text-foreground mb-3">
+            <h3 className="text-sm sm:text-base font-bold text-foreground mb-3">
               Información de la cuenta en propiedades.com
             </h3>
             <div className="rounded-lg border border-border bg-card divide-y divide-border">
@@ -146,7 +146,7 @@ const MiCuenta = () => {
             </div>
 
             {/* Información de contacto */}
-            <h3 className="text-base font-bold text-foreground mb-3 mt-8">
+            <h3 className="text-sm sm:text-base font-bold text-foreground mb-3 mt-6 sm:mt-8">
               Información de contacto
             </h3>
             <div className="rounded-lg border border-border bg-card divide-y divide-border">

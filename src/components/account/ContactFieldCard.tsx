@@ -58,7 +58,7 @@ const ContactFieldCard = ({
 
   if (isEditing) {
     return (
-      <div className="px-5 py-4">
+      <div className="px-4 py-3 sm:px-5 sm:py-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
             <div className="relative">
@@ -93,26 +93,26 @@ const ContactFieldCard = ({
   }
 
   return (
-    <div className="px-5 py-4">
-      <div className="flex items-center justify-between gap-4">
+    <div className="px-4 py-3 sm:px-5 sm:py-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
         <div className="min-w-0">
           <p className="text-xs font-medium text-muted-foreground">{field.label}</p>
-          <p className="text-sm text-foreground mt-0.5">{field.value}</p>
+          <p className="text-sm text-foreground mt-0.5 truncate">{field.value}</p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap shrink-0">
           <StatusBadge status={field.status} />
           {showConfirm && (
             <button
               onClick={() => onConfirm(field)}
-              className="text-sm font-semibold text-primary hover:underline"
+              className="text-xs sm:text-sm font-semibold text-primary hover:underline"
             >
               {copy.cta}
             </button>
           )}
           <button
             onClick={handleStartEdit}
-            className="text-sm font-medium text-muted-foreground hover:text-foreground hover:underline"
+            className="text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground hover:underline"
           >
             Modificar
           </button>
