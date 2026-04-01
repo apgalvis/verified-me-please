@@ -120,9 +120,9 @@ const MiCuenta = () => {
             {/* Progress section */}
             <VerificationProgress fields={contactFields} />
 
-            {/* Información de usuario */}
+            {/* Información de la cuenta */}
             <h3 className="text-base font-bold text-foreground mb-3">
-              Información de usuario
+              Información de la cuenta en propiedades.com
             </h3>
             <div className="rounded-lg border border-border bg-card divide-y divide-border">
               {userInfoFields.map((field) => (
