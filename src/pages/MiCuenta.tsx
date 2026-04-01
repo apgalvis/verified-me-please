@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import AccountHeader from "@/components/account/AccountHeader";
 import UserAvatar from "@/components/account/UserAvatar";
 import ContactFieldCard from "@/components/account/ContactFieldCard";
-import OtpVerificationModal from "@/components/account/OtpVerificationModal";
+import OtpVerificationModal, { OtpSession } from "@/components/account/OtpVerificationModal";
 import VerificationProgress from "@/components/account/VerificationProgress";
 import FullVerificationCelebration from "@/components/account/FullVerificationCelebration";
 import { ContactField, UserProfile } from "@/types/account";
@@ -30,11 +30,17 @@ const MiCuenta = () => {
   const [contactFields, setContactFields] = useState<ContactField[]>(initialContactFields);
   const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [otpSessions, setOtpSessions] = useState<Record<string, OtpSession>>({});
   const [otpModal, setOtpModal] = useState<{
     open: boolean;
     field: ContactField | null;
     pendingValue: string | null;
   }>({ open: false, field: null, pendingValue: null });
+
+  const handleSessionUpdate = useCallback((session: OtpSession | null) => {
+    if (!session) return;
+    setOtpSessions((prev) => ({ ...prev, [session.fieldId]: session }));
+  }, []);
 
   const allVerified = useMemo(
     () => contactFields.every((f) => f.status === "verified"),
@@ -168,6 +174,9 @@ const MiCuenta = () => {
           destination={otpDestination}
           onClose={closeOtp}
           onVerified={handleVerified}
+          fieldId={otpModal.field.id}
+          session={otpSessions[otpModal.field.id] ?? null}
+          onSessionUpdate={handleSessionUpdate}
         />
       )}
 

@@ -1,23 +1,37 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 interface OtpCountdownProps {
+  /** If provided, resume from this remaining time instead of starting fresh */
+  resumeSeconds?: number;
   initialSeconds?: number;
   onResend: () => void;
+  /** Called every second with remaining seconds so parent can persist */
+  onTick?: (remaining: number) => void;
 }
 
-const OtpCountdown = ({ initialSeconds = 60, onResend }: OtpCountdownProps) => {
-  const [seconds, setSeconds] = useState(initialSeconds);
-  const [isActive, setIsActive] = useState(true);
+const OtpCountdown = ({
+  resumeSeconds,
+  initialSeconds = 60,
+  onResend,
+  onTick,
+}: OtpCountdownProps) => {
+  const startValue = resumeSeconds != null && resumeSeconds > 0 ? resumeSeconds : initialSeconds;
+  const [seconds, setSeconds] = useState(startValue);
+  const [isActive, setIsActive] = useState(startValue > 0);
+  const onTickRef = useRef(onTick);
+  onTickRef.current = onTick;
 
   useEffect(() => {
     if (!isActive || seconds <= 0) return;
     const timer = setInterval(() => {
       setSeconds((s) => {
-        if (s <= 1) {
+        const next = s - 1;
+        onTickRef.current?.(next);
+        if (next <= 0) {
           setIsActive(false);
           return 0;
         }
-        return s - 1;
+        return next;
       });
     }, 1000);
     return () => clearInterval(timer);
