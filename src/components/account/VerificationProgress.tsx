@@ -29,7 +29,7 @@ const VerificationProgress = ({ fields }: VerificationProgressProps) => {
       ? "Verifica tus datos para recibir más leads y generar mayor confianza."
       : verified === total - 1
         ? "¡Te falta solo uno! Completa tu verificación para obtener el badge."
-        : "Sigue verificando tus datos para mejorar tu rendimiento.";
+        : null;
 
   return (
     <div className="rounded-lg border border-border bg-card p-5 mb-6">
