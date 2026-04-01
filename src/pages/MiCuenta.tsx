@@ -146,7 +146,7 @@ const MiCuenta = () => {
             </div>
 
             {/* Información de contacto */}
-            <h3 className="text-base font-bold text-foreground mb-3">
+            <h3 className="text-base font-bold text-foreground mb-3 mt-8">
               Información de contacto
             </h3>
             <div className="rounded-lg border border-border bg-card divide-y divide-border">
