@@ -117,6 +117,9 @@ const MiCuenta = () => {
           </div>
 
           <div className="flex-1 min-w-0">
+            {/* Progress section */}
+            <VerificationProgress fields={contactFields} />
+
             {/* Información de usuario */}
             <h3 className="text-base font-bold text-foreground mb-3">
               Información de usuario
@@ -134,11 +137,6 @@ const MiCuenta = () => {
                   onCancelEdit={() => {}}
                 />
               ))}
-            </div>
-
-            {/* Progress section */}
-            <div className="mt-10">
-              <VerificationProgress fields={contactFields} />
             </div>
 
             {/* Información de contacto */}
