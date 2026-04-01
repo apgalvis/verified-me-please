@@ -89,8 +89,7 @@ const VerificationProgress = ({ fields }: VerificationProgressProps) => {
         })}
       </div>
 
-      {/* Nudge */}
-      {!allVerified && (
+      {!allVerified && nudgeMessage && (
         <p className="mt-3 text-xs text-primary font-medium">{nudgeMessage}</p>
       )}
     </div>
